@@ -3,7 +3,6 @@ package machine
 import (
 	"fmt"
 	"net"
-	"strconv"
 	"strings"
 	"syscall"
 	"unsafe"
@@ -28,52 +27,33 @@ func GetUniqueId() string {
 	return van.Md5(str)
 }
 
-type diskusage struct {
-	Path  string `json:"path"`
-	Total uint64 `json:"total"`
-	Free  uint64 `json:"free"`
-}
-
-func usage(getDiskFreeSpaceExW *syscall.LazyProc, path string) (diskusage, error) {
-	lpFreeBytesAvailable := int64(0)
-	var info = diskusage{Path: path}
-	diskret, _, err := getDiskFreeSpaceExW.Call(
-		uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr(info.Path))),
-		uintptr(unsafe.Pointer(&lpFreeBytesAvailable)),
-		uintptr(unsafe.Pointer(&(info.Total))),
-		uintptr(unsafe.Pointer(&(info.Free))))
-	if diskret != 0 {
-		err = nil
-	}
-	return info, err
+func GetStr() string {
+	var str string
+	str = GetBiosInfo()               // BIOS
+	str += "|" + GetMotherboardInfo() // 主板
+	str += "|" + GetCpuInfo()         // CPU，相同CPU此参数相同
+	str += "|" + GetMemory()          // 内存数
+	str += "|" + GetDiskInfo()        // 硬盘，按盘符、总量
+	str += "|" + GetMac()             // Mac 地址
+	return str
 }
 
 // dist
 func GetDiskInfo() (infos string) {
-	GetLogicalDriveStringsW := kernel.NewProc("GetLogicalDriveStringsW")
-	GetDiskFreeSpaceExW := kernel.NewProc("GetDiskFreeSpaceExW")
-	lpBuffer := make([]byte, 254)
-	diskret, _, _ := GetLogicalDriveStringsW.Call(
-		uintptr(len(lpBuffer)),
-		uintptr(unsafe.Pointer(&lpBuffer[0])))
-	if diskret == 0 {
-		return
+	// https://docs.microsoft.com/zh-cn/windows/win32/cimwin32prov/win32-diskdrive
+	var storageinfo []struct {
+		Caption      string
+		SerialNumber string
 	}
-	for _, v := range lpBuffer {
-		if v >= 65 && v <= 90 {
-			path := string(v) + ":"
-			if path == "A:" || path == "B:" {
-				continue
-			}
-			info, err := usage(GetDiskFreeSpaceExW, string(v)+":")
-			if err != nil {
-				continue
-			}
-			total := strconv.FormatInt(int64(info.Total), 10)
-			infos += string(info.Path) + total
-		}
+	err := wmi.Query("Select * from Win32_DiskDrive ", &storageinfo)
+	if err != nil {
+		return "nil disk"
 	}
-	return infos
+	res := ""
+	for _, v := range storageinfo {
+		res += "Caption:" + v.Caption + ";SerialNumber:" + v.SerialNumber + ";"
+	}
+	return res
 }
 
 //CPU信息

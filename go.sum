@@ -1,0 +1,6 @@
+github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d h1:G0m3OIz70MZUWq3EgK3CesDbo8upS2Vm9/P3FtgI+Jk=
+github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d/go.mod h1:3eOhrUMpNV+6aFIbp5/iudMxNCF27Vw2OZgy4xEx0Fg=
+github.com/go-ole/go-ole v1.2.4 h1:nNBDSCOigTSiarFpYE9J/KtEA1IOW4CNeqT9TQDqCxI=
+github.com/go-ole/go-ole v1.2.4/go.mod h1:XCwSNxSkXRo4vlyPy93sltvi/qJq0jqQhjqQNIwKuxM=
+github.com/vcgo/van v0.0.0-20181210073545-5595a3ce9bec h1:GND/xMjMnb365rsQxOYU6CC0Eyak2b+QgyVM+rmGaMM=
+github.com/vcgo/van v0.0.0-20181210073545-5595a3ce9bec/go.mod h1:wZZoqWdhJ4yCw+1NkA3WU7UM8Fh0SzDkW00sYLK3dc8=
